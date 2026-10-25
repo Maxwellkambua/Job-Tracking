@@ -1,0 +1,43 @@
+-- =========================================================
+--  Kenya Employment by Industry — Power BI measures
+--  Prerequisite relationships:
+--    employment_fact[industry_id]   → industry_dim[industry_id]
+--    employment_fact[year_key]      → date_dim[year_key]
+--    macro_context[year_key]        → date_dim[year_key]
+-- =========================================================
+
+Total Formal Employment =
+SUM( employment_fact[employment_thousands] )
+
+Employment YoY Change =
+VAR Current = [Total Formal Employment]
+VAR Prior   = CALCULATE( [Total Formal Employment],
+                         SAMEPERIODLASTYEAR( date_dim[year_key] ) )
+RETURN IF( NOT ISBLANK( Prior ), Current - Prior )
+
+Employment YoY % =
+VAR Current = [Total Formal Employment]
+VAR Prior   = CALCULATE( [Total Formal Employment],
+                         SAMEPERIODLASTYEAR( date_dim[year_key] ) )
+RETURN DIVIDE( Current - Prior, Prior )
+
+Industry Rank =
+RANKX( ALL( industry_dim[industry_name] ),
+       [Total Formal Employment], , DESC, DENSE )
+
+Industry Share % =
+DIVIDE(
+    [Total Formal Employment],
+    CALCULATE( [Total Formal Employment], ALL( industry_dim ) )
+)
+
+Covid Shock % (2019→2021) =
+VAR E2019 = CALCULATE( [Total Formal Employment], date_dim[year_key] = 2019 )
+VAR E2021 = CALCULATE( [Total Formal Employment], date_dim[year_key] = 2021 )
+RETURN DIVIDE( E2021 - E2019, E2019 )
+
+Informal Sector Share =
+AVERAGE( macro_context[informal_sector_share_pct] )
+
+Overall Unemployment Rate =
+AVERAGE( macro_context[overall_unemployment_rate] )

@@ -1,0 +1,13 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+data/raw/*.xlsx
+data/raw/*.pdf
+data/processed/*.csv
+data/*.db
+.ipynb_checkpoints/
+.DS_Store
+venv/
+.venv/
